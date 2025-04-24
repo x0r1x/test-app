@@ -55,8 +55,10 @@ jobs:
 
       - name: Deploy
         run: |
-          TAG=${GITHUB_REF#refs/tags/}
-          if [ -z "$TAG" ]; then
+          # Определяем TAG
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            TAG=${GITHUB_REF#refs/tags/}
+          else
             TAG=$(git rev-parse --short HEAD)
           fi
 
