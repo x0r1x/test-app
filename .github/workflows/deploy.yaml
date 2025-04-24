@@ -9,7 +9,7 @@ env:
   REGISTRY: cr.yandex/${{ secrets.YC_REGISTRY_ID }}
   APP_NAME: test-app
   K8S_NAMESPACE: default
-  YC_SA_KEY: ${{ secrets.YC_SA_KEY }}
+  JSON_KEY: ${{ secrets.YC_SA_KEY }}
 
 jobs:
   build-and-push:
