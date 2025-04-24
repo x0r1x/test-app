@@ -9,6 +9,7 @@ env:
   REGISTRY: cr.yandex/${{ secrets.YC_REGISTRY_ID }}
   APP_NAME: test-app
   K8S_NAMESPACE: default
+  YC_SA_KEY: ${{ secrets.YC_SA_KEY }}
 
 jobs:
   build-and-push:
@@ -18,7 +19,7 @@ jobs:
 
       - name: Login to Yandex Container Registry
         run: |
-          echo "${{ secrets.YC_SA_KEY }}" | docker login \
+          echo "$JSON_KEY" | docker login \
             --username json_key \
             --password-stdin cr.yandex
 
