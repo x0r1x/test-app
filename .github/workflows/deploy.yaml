@@ -65,17 +65,5 @@ jobs:
 
           cat k8s/app/deployment.yml
 
-          if kubectl get deployment/$APP_NAME -n $K8S_NAMESPACE; then
-            # Обновляем образ в Deployment, если существует
-            kubectl set image deployment/$APP_NAME \
-              $APP_NAME=$REGISTRY/$APP_NAME:$TAG \
-              -n $K8S_NAMESPACE
-          else
-            # Создаем образ в Deployment, если не существует
-            kubectl create deployment $APP_NAME \
-              --image=$REGISTRY/$APP_NAME:$TAG \
-              -n $K8S_NAMESPACE
-          fi
-
           # Применяем остальные манифесты
           kubectl apply -f k8s/app/ -n $K8S_NAMESPACE
