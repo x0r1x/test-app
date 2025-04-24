@@ -6,7 +6,7 @@ on:
     tags: ["v*.*.*"]
 
 env:
-  REGISTRY: cr.yandex/<registry-id>
+  REGISTRY: cr.yandex/${{ secrets.YC_REGISTRY_ID }}
   APP_NAME: test-app
   K8S_NAMESPACE: default
 
