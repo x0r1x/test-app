@@ -1,0 +1,67 @@
+name: Deploy to Yandex Cloud
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*.*.*"]
+
+env:
+  REGISTRY: cr.yandex/<registry-id>
+  APP_NAME: test-app
+  K8S_NAMESPACE: default
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to Yandex Container Registry
+        run: |
+          echo "${{ secrets.YC_SA_KEY }}" | docker login \
+            --username json_key \
+            --password-stdin cr.yandex
+
+      - name: Build and Push
+        run: |
+          # Автоматическое тегирование
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            TAG=${GITHUB_REF#refs/tags/}
+          else
+            TAG=$(git rev-parse --short HEAD)
+          fi
+
+          docker build -t $REGISTRY/$APP_NAME:$TAG .
+          docker push $REGISTRY/$APP_NAME:$TAG
+
+  deploy-to-k8s:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Kubernetes
+        uses: azure/setup-kubectl@v3
+        with:
+          version: "latest"
+
+      - name: Configure Access
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+          kubectl config use-context my-kubespray-cluster
+
+      - name: Deploy
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          if [ -z "$TAG" ]; then
+            TAG=$(git rev-parse --short HEAD)
+          fi
+
+          # Обновляем образ в Deployment
+          kubectl set image deployment/$APP_NAME \
+            $APP_NAME=$REGISTRY/$APP_NAME:$TAG \
+            -n $K8S_NAMESPACE
+
+          # Применяем остальные манифесты
+          kubectl apply -f k8s/app/ -n $K8S_NAMESPACE
