@@ -10,6 +10,7 @@ env:
   APP_NAME: test-app
   K8S_NAMESPACE: default
   JSON_KEY: ${{ secrets.YC_SA_KEY }}
+  KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
 
 jobs:
   build-and-push:
@@ -49,8 +50,8 @@ jobs:
       - name: Configure Access
         run: |
           mkdir -p ~/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
-          kubectl config use-context my-kubespray-cluster
+          echo "$KUBE_CONFIG" > ~/.kube/config
+          kubectl config use-context kubernetes-admin@cluster.local
 
       - name: Deploy
         run: |
