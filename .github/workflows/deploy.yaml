@@ -67,3 +67,6 @@ jobs:
 
           # Применяем остальные манифесты
           kubectl apply -f k8s/app/ -n $K8S_NAMESPACE
+
+          # Принудительный restart Deployment для триггера обновления
+          kubectl rollout restart deployment/$APP_NAME -n $K8S_NAMESPACE
